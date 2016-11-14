@@ -61,6 +61,36 @@
       </script>
 </head>
 <body>
+<script src="https://eu11.salesforce.com/support/api/38.0/interaction.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+      <script type="text/javascript">
+	  var socket = io();
+	  socket.on('connection', function(data) {
+	   });
+	   
+	  var listener = function (response) {
+           
+if (response.result) {
+ var result = JSON.parse(response.result);             
+alert('User clicked on a phone number.' + result.number );
+socket.emit('make_a_call', result.number);
+          
+ }
+       
+ };
+ 
+	  
+	  
+	  function startCall(response) {
+	  sforce.interaction.setVisible(true);
+	  var result = JSON.parse(response.result);
+	  alert(result);
+	  }
+	  
+	  sforce.interaction.cti.enableClickToDial();
+	  sforce.interaction.cti.onClickToDial(listener);
+	  </script>
+	  
       <button onclick="isInConsole();">isInConsole</button><br/>
       <button onclick="getCallCenterSettings();">getCallCenterSettings</button><br/>
       <button onclick="setSoftphoneHeight();">setSoftphoneHeight(300)</button><br/>
