@@ -68,24 +68,26 @@
 	  socket.on('connection', function(data) {
 	   });
 	   
+	   socket.on('Phonecall', function(data) {
+       sforce.interaction.screenPop('/500/e?retURL=%2F500%2Fo&RecordType=0120Y000000UYZz&ent=Case',true ,);
+	   sforce.interaction.setVisible(true);
+	   console.log(data);
+	   });
+	   
 	  var listener = function (response) {
            
 if (response.result) {
  var result = JSON.parse(response.result);             
 alert('User clicked on a phone number.' + result.number );
 socket.emit('make_a_call', result.number);
-          
+    sforce.interaction.setVisible(true);      
  }
        
  };
  
 	  
 	  
-	  function startCall(response) {
-	  sforce.interaction.setVisible(true);
-	  var result = JSON.parse(response.result);
-	  alert(result);
-	  }
+	
 	  
 	  sforce.interaction.cti.enableClickToDial();
 	  sforce.interaction.cti.onClickToDial(listener);

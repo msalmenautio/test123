@@ -1,26 +1,68 @@
-const express = require('express')
-const socketIO = require('socket.io');
-const app = express();
-var client = require('heroku-redis').createClient(process.env.REDIS_URL);
-
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+const bodyParser = require('body-parser');
+var client = require('redis').createClient(process.env.REDIS_URL);
 const PORT = process.env.PORT ||8080;
+app.use(bodyParser.urlencoded({ extended: false }));
+var jsonParser = bodyParser.json();
 
 
 
-const server = express()
-  .use((req, res) =>  res.sendFile(__dirname + '/softphone.html')) 
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
-
-const io = socketIO(server);
 
 
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/softphone.html');
+});
 
-io.on('connection', (socket) => {
+app.post('/voice',jsonParser, function(req, res) {
+	
+  if (!req.body) return res.sendStatus(400);
+  
+  client.get(req.body.FederatedID, function (err, socketId) {
+    console.log(socketId.toString());  
+	
+	if (io.sockets.connected[socketId]) {
+    io.sockets.connected[socketId].emit('Phonecall', + req.body.PhoneNumber);
+}
+	
+
+});
+	  
+  res.send('Ok' );
+});
+
+
+
+  
+
+
+ 
+
+
+
+
+io.on('connection', function(socket) {
   console.log('Client connected');
+  client.set("msalmenautio",socket.id, function(err) {
+	  console.log('Socket Id: ' + socket.id);
+        if (err) {
+           // Something went wrong
+           console.error("error");
+        }
+  });
+  
   socket.on('make_a_call', function (data) {
 	 console.log(data); });
+  
   socket.on('disconnect', () => console.log('Client disconnected'));
 });
+
+server.listen(PORT, function(){
+  console.log('listening on *: ' + PORT);
+});
+
+
 
 
 
